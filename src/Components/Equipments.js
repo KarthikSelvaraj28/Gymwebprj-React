@@ -6,6 +6,7 @@ import {
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import LocalMallIcon from "@mui/icons-material/LocalMall";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -22,12 +23,10 @@ const Equipments = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                console.log("Fetching data...");
                 const response = await fetch("https://localhost:7092/api/Equipments/List");
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
     
                 const data = await response.json();
-                console.log("Received data:", data);
                 setEquipments(data);
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -40,6 +39,7 @@ const Equipments = () => {
     
     const handleSelect = (equipment) => {
         setSelectedEquipment(equipment);
+        setQuantity(1); // Reset quantity when opening modal
         setOpen(true);
     };
 
@@ -47,9 +47,6 @@ const Equipments = () => {
         let value = parseInt(e.target.value) || 1;
         setQuantity(value < 1 ? 1 : value); // Ensure quantity is at least 1
     };
-
-    const handleIncrease = () => setQuantity((prev) => prev + 1);
-    const handleDecrease = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
     const handleAddToCart = async () => {
         if (!selectedEquipment) return;
@@ -87,6 +84,16 @@ const Equipments = () => {
         }
     };
 
+    const handleBuyNow = () => {
+        if (!selectedEquipment) return;
+        if (!userEmail) {
+            alert("Please log in to proceed with the purchase.");
+            return;
+        }
+
+        navigate(`/checkout?productID=${selectedEquipment.id}&quantity=${quantity}&total=${selectedEquipment.price * quantity}`);
+    };
+
     return (
         <Container maxWidth="lg" sx={{ mt: 4 }}>
             <Typography variant="h4" textAlign="center" gutterBottom sx={{ fontWeight: "bold", color: "#2E3B55" }}>
@@ -122,6 +129,9 @@ const Equipments = () => {
                                         <Typography variant="h6" gutterBottom textAlign="center" sx={{ fontWeight: "bold", color: "#333" }}>
                                             {equipment.equipments}
                                         </Typography>
+                                        <Typography variant="body1" textAlign="center" color="primary" fontWeight="bold">
+                                            ₹{equipment.price}
+                                        </Typography>
                                         <Grid container justifyContent="center" alignItems="center">
                                             <IconButton color="primary" onClick={() => handleSelect(equipment)}>
                                                 <VisibilityIcon />
@@ -143,53 +153,29 @@ const Equipments = () => {
                 </DialogTitle>
                 <DialogContent>
                     <Box textAlign="center">
-                        <CardMedia
-                            component="img"
-                            height="220"
-                            image={`/images/${selectedEquipment?.imageurl}`}
-                            alt={selectedEquipment?.equipments}
-                            sx={{ objectFit: "contain", marginBottom: "10px", borderRadius: "10px" }}
-                        />
+                        {selectedEquipment && (
+                            <CardMedia
+                                component="img"
+                                height="220"
+                                image={`/images/${selectedEquipment.imageurl}`}
+                                alt={selectedEquipment.equipments}
+                                sx={{ objectFit: "contain", marginBottom: "10px", borderRadius: "10px" }}
+                            />
+                        )}
                     </Box>
-                    <Typography sx={{ fontWeight: "bold", color: "#555" }}><strong>Weight:</strong> {selectedEquipment?.kg} Kg</Typography>
-                    <Typography sx={{ fontWeight: "bold", color: "#555" }}><strong>Price:</strong> ₹{selectedEquipment?.price}</Typography>
-                    <Typography sx={{ fontWeight: "bold", color: "#555", mt: 1 }}><strong>Description:</strong> {selectedEquipment?.description}</Typography>
-                    
-                    {/* ✅ Styled Quantity Input with Increment/Decrement Buttons */}
+                    <Typography sx={{ fontWeight: "bold", color: "#555" }}>
+                        <strong>Description:</strong> {selectedEquipment?.description}
+                    </Typography>
+
+                    {/* ✅ Quantity Selection */}
                     <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
-                        <Button 
-                            variant="contained" 
-                            onClick={handleDecrease} 
-                            sx={{ minWidth: "40px", borderRadius: "50%", fontSize: "20px", mr: 1 }}
-                        >
-                            −
-                        </Button>
-                        <TextField
-                            type="number"
-                            variant="outlined"
-                            size="small"
-                            sx={{ maxWidth: "80px", "& input": { textAlign: "center", fontSize: "16px", fontWeight: "bold" } }}
-                            value={quantity}
-                            onChange={handleQuantityChange}
-                        />
-                        <Button 
-                            variant="contained" 
-                            onClick={handleIncrease} 
-                            sx={{ minWidth: "40px", borderRadius: "50%", fontSize: "20px", ml: 1 }}
-                        >
-                            +
-                        </Button>
+                        <Button variant="contained" onClick={() => setQuantity((prev) => Math.max(1, prev - 1))} sx={{ minWidth: "40px", borderRadius: "50%", fontSize: "20px", mr: 1 }}>−</Button>
+                        <TextField type="number" variant="outlined" size="small" sx={{ maxWidth: "80px", "& input": { textAlign: "center" } }} value={quantity} onChange={handleQuantityChange} />
+                        <Button variant="contained" onClick={() => setQuantity((prev) => prev + 1)} sx={{ minWidth: "40px", borderRadius: "50%", fontSize: "20px", ml: 1 }}>+</Button>
                     </Box>
                     
-                    <Button 
-                        variant="contained" 
-                        fullWidth 
-                        sx={{ mt: 2, borderRadius: "25px", fontSize: "1rem", fontWeight: "bold" }} 
-                        onClick={handleAddToCart}
-                        startIcon={<ShoppingCartIcon />}
-                    >
-                        Add to Cart
-                    </Button>
+                    <Button variant="contained" fullWidth sx={{ mt: 2, borderRadius: "25px" }} onClick={handleAddToCart} startIcon={<ShoppingCartIcon />}>Add to Cart</Button>
+                    <Button variant="contained" fullWidth sx={{ mt: 2, borderRadius: "25px", backgroundColor: "#ff5722" }} onClick={handleBuyNow} startIcon={<LocalMallIcon />}>Buy Now</Button>
                 </DialogContent>
             </Dialog>
         </Container>

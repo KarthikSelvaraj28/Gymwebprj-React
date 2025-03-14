@@ -7,6 +7,7 @@ import {
   Paper,
   Box,
   InputAdornment,
+  Link,
 } from "@mui/material";
 import { Person, Email, Lock, CalendarToday, Home } from "@mui/icons-material";
 
@@ -19,12 +20,12 @@ const Register = () => {
     address: "",
   });
 
-  const [message, setMessage] = useState(""); // State for success/error message
-  const [error, setError] = useState(""); // State for input errors
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError(""); // Clear previous error message
+    setError("");
   };
 
   const handleSubmit = async (e) => {
@@ -32,10 +33,9 @@ const Register = () => {
     setMessage("");
     setError("");
 
-    const formattedDob = new Date(formData.dob).toISOString(); // Convert date format
+    const formattedDob = new Date(formData.dob).toISOString();
 
     try {
-      // Check if email already exists before sending request
       const checkResponse = await fetch(
         `https://localhost:7092/api/User/CheckEmail?email=${formData.email}`
       );
@@ -48,7 +48,6 @@ const Register = () => {
         }
       }
 
-      // Proceed with registration if email is not found
       const response = await fetch("https://localhost:7092/api/User/Register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -74,7 +73,6 @@ const Register = () => {
       setMessage("User registered successfully!");
       console.log("Registration successful:", data);
 
-      // Clear form after successful submission
       setFormData({
         fullname: "",
         email: "",
@@ -89,18 +87,24 @@ const Register = () => {
   };
 
   return (
-    <Container maxWidth="sm">
-      <Paper elevation={5} sx={{ padding: 4, borderRadius: 3, marginTop: 5 }}>
-        <Typography variant="h4" textAlign="center" gutterBottom>
-          Register
+    <Container maxWidth="md" sx={{
+      display: "flex", 
+      justifyContent: "center", 
+      alignItems: "center", 
+      minHeight: "100vh",
+      background: "linear-gradient(to right, #ff6f61, #de425b)",
+    }}>
+      <Paper elevation={5} sx={{ padding: 4, borderRadius: 3, maxWidth: 500, width: "100%", textAlign: "center" }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", color: "#333" }}>
+          Create an Account
         </Typography>
         {message && (
-          <Typography variant="subtitle1" color="success" textAlign="center">
+          <Typography variant="subtitle1" color="success" gutterBottom>
             {message}
           </Typography>
         )}
         {error && (
-          <Typography variant="subtitle1" color="error" textAlign="center">
+          <Typography variant="subtitle1" color="error" gutterBottom>
             {error}
           </Typography>
         )}
@@ -198,12 +202,25 @@ const Register = () => {
           <Button
             type="submit"
             variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ padding: 1.5, fontSize: "1rem" }}
+            sx={{
+              backgroundColor: "#ff6f61",
+              color: "white",
+              padding: "12px 20px",
+              fontSize: "1rem",
+              fontWeight: "bold",
+              borderRadius: "8px",
+              width: "100%",
+              "&:hover": { backgroundColor: "#de425b" },
+            }}
           >
-            Register
+            Sign Up
           </Button>
+          <Typography variant="body2" sx={{ marginTop: 2 }}>
+            Already have an account?{' '}
+            <Link href="/login" sx={{ color: "#ff6f61", fontWeight: "bold", textDecoration: "none", '&:hover': { textDecoration: "underline" } }}>
+              Sign in here
+            </Link>
+          </Typography>
         </form>
       </Paper>
     </Container>
