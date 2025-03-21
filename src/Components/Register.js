@@ -110,21 +110,24 @@ const Register = () => {
         )}
         <form onSubmit={handleSubmit}>
           <Box mb={2}>
-            <TextField
-              fullWidth
-              label="Full Name"
-              name="fullname"
-              value={formData.fullname}
-              onChange={handleChange}
-              required
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Person />
-                  </InputAdornment>
-                ),
-              }}
-            />
+          <TextField
+  fullWidth
+  label="Full Name"
+  name="fullname"
+  value={formData.fullname}
+  type="text"
+  onChange={handleChange}
+  required
+  inputProps={{ pattern: "[A-Za-z ]+" }} // HTML validation
+  InputProps={{
+    startAdornment: (
+      <InputAdornment position="start">
+        <Person />
+      </InputAdornment>
+    ),
+  }}
+/>
+
           </Box>
           <Box mb={2}>
             <TextField

@@ -12,9 +12,10 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [cartItemCount] = useState(0);
+  const [cartItemCount, setCartItemCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Check login status
   useEffect(() => {
     const checkLoginStatus = () => {
       const userName = localStorage.getItem("userName");
@@ -26,6 +27,20 @@ function App() {
     return () => window.removeEventListener("storage", checkLoginStatus);
   }, []);
 
+  // Update cart count
+  useEffect(() => {
+    const updateCartCount = () => {
+      const cartItems = JSON.parse(localStorage.getItem("cart")) || [];
+      setCartItemCount(cartItems.length);
+    };
+
+    updateCartCount();
+    window.addEventListener("storage", updateCartCount);
+
+    return () => window.removeEventListener("storage", updateCartCount);
+  }, []);
+
+  // Handle logout
   const handleLogout = () => {
     localStorage.removeItem("userName");
     localStorage.removeItem("userEmail");
@@ -38,7 +53,7 @@ function App() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      {!isLoginPage && !isRegisterPage && isLoggedIn && (
+      {!isLoginPage && !isRegisterPage && (
         <AppBar 
           position="sticky" 
           sx={{ 
@@ -64,24 +79,24 @@ function App() {
             >
               FIT F@CTORY 🏋️‍♂️
             </Typography>
-            {location.pathname === "/equipments" && (
-  <TextField
-    variant="outlined"
-    placeholder="Search for products..."
-    size="small"
-    value={searchQuery}
-    onChange={(e) => setSearchQuery(e.target.value)}
-    sx={{
-      width: "250px",
-      backgroundColor: "#f1f1f1",
-      borderRadius: "8px",
-      "& .MuiOutlinedInput-root": {
-        borderRadius: "8px",
-      },
-    }}
-  />
-)}
 
+            {location.pathname === "/equipments" && (
+              <TextField
+                variant="outlined"
+                placeholder="Search for products..."
+                size="small"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                sx={{
+                  width: "250px",
+                  backgroundColor: "#f1f1f1",
+                  borderRadius: "8px",
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "8px",
+                  },
+                }}
+              />
+            )}
 
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Button component={Link} to="/equipments" sx={navButtonStyle}>
@@ -95,9 +110,15 @@ function App() {
                   <ShoppingCartIcon sx={{ fontSize: "24px" }} />
                 </Badge>
               </Button>
-              <Button onClick={handleLogout} sx={logoutButtonStyle}>
-                Logout
-              </Button>
+              {isLoggedIn ? (
+                <Button onClick={handleLogout} sx={logoutButtonStyle}>
+                  Logout
+                </Button>
+              ) : (
+                <Button component={Link} to="/login" sx={loginButtonStyle}>
+                  Login
+                </Button>
+              )}
             </Box>
           </Toolbar>
         </AppBar>
@@ -119,16 +140,20 @@ function App() {
         <Routes>
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
-          {isLoggedIn ? (
-            <>
-              <Route path="/equipments" element={<Equipments searchQuery={searchQuery} />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/myorders" element={<Myorders />} />
-              <Route path="/" element={<Navigate to="/equipments" />} />
-            </>
-          ) : (
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          )}
+          <Route path="/equipments" element={<Equipments searchQuery={searchQuery} />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/myorders" element={<Myorders />} />
+          
+          {/* Redirect to Equipments first */}
+          <Route path="/" element={<Navigate to="/equipments" />} />
+
+          {/* Redirect to login only if cart has items */}
+          <Route
+            path="*"
+            element={
+              cartItemCount > 0 && !isLoggedIn ? <Navigate to="/login" replace /> : <Navigate to="/equipments" />
+            }
+          />
         </Routes>
       </Container>
     </Box>
