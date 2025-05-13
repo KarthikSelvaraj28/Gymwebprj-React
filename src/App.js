@@ -1,6 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route, Link, useNavigate, Navigate, useLocation } from "react-router-dom";
-import { AppBar, Toolbar, Button, Typography, Container, Box, TextField, Badge } from "@mui/material";
+import {
+  Routes,
+  Route,
+  Link,
+  useNavigate,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
+import {
+  AppBar,
+  Toolbar,
+  Button,
+  Typography,
+  Container,
+  Box,
+  TextField,
+  Badge,
+} from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import Register from "./Components/Register";
 import Login from "./Components/Login";
@@ -53,24 +69,31 @@ function App() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
+      {/* AppBar only shows if NOT on login or register pages */}
       {!isLoginPage && !isRegisterPage && (
-        <AppBar 
-          position="sticky" 
-          sx={{ 
-            background: "#ffffff", 
+        <AppBar
+          position="sticky"
+          sx={{
+            background: "#ffffff",
             boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
             padding: "10px 0",
-            zIndex: 1100
+            zIndex: 1100,
           }}
         >
-          <Toolbar sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Typography 
-              variant="h5" 
-              component={Link} 
-              to="/" 
-              sx={{ 
+          <Toolbar
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Typography
+              variant="h5"
+              component={Link}
+              to="/"
+              sx={{
                 textDecoration: "none",
-                color: "#333", 
+                color: "#333",
                 fontWeight: "bold",
                 fontFamily: "Poppins, sans-serif",
                 letterSpacing: "1px",
@@ -124,18 +147,7 @@ function App() {
         </AppBar>
       )}
 
-      {isRegisterPage && (
-        <Box sx={{ textAlign: "center", mt: 2 }}>
-          <Button 
-            component={Link} 
-            to="/login" 
-            sx={loginButtonStyle}
-          >
-            Already have an account? Login
-          </Button>
-        </Box>
-      )}
-
+     
       <Container sx={{ mt: 4 }}>
         <Routes>
           <Route path="/register" element={<Register />} />
@@ -143,15 +155,19 @@ function App() {
           <Route path="/equipments" element={<Equipments searchQuery={searchQuery} />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/myorders" element={<Myorders />} />
-          
-          {/* Redirect to Equipments first */}
+
+          {/* Default route */}
           <Route path="/" element={<Navigate to="/equipments" />} />
 
-          {/* Redirect to login only if cart has items */}
+          {/* Redirect to login if cart has items and user is not logged in */}
           <Route
             path="*"
             element={
-              cartItemCount > 0 && !isLoggedIn ? <Navigate to="/login" replace /> : <Navigate to="/equipments" />
+              cartItemCount > 0 && !isLoggedIn ? (
+                <Navigate to="/login" replace />
+              ) : (
+                <Navigate to="/equipments" />
+              )
             }
           />
         </Routes>
